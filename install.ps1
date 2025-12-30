@@ -6,7 +6,8 @@ $Arch = $env:PROCESSOR_ARCHITECTURE
 if ($Arch -eq "AMD64") {
     $BinaryArch = "x64"
 } elseif ($Arch -eq "ARM64") {
-    $BinaryArch = "arm64"
+    Write-Host "ARM64 detected. Using x64 binary via emulation."
+    $BinaryArch = "x64"
 } else {
     Write-Error "Unsupported architecture: $Arch"
     exit 1

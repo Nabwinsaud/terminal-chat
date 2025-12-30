@@ -35,7 +35,6 @@ jobs:
       - name: Build Windows binaries
         run: |
           bun build --compile --target=bun-windows-x64 chat.ts --outfile terminal-chat-windows-x64.exe
-          bun build --compile --target=bun-windows-arm64 chat.ts --outfile terminal-chat-windows-arm64.exe
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -47,5 +46,4 @@ jobs:
             terminal-chat-darwin-x64
             terminal-chat-darwin-arm64
             terminal-chat-windows-x64.exe
-            terminal-chat-windows-arm64.exe
 
