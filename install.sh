@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO="nabwinsaud/terminal-chat"
+REPO="Nabwinsaud/terminal-chat"
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
 
