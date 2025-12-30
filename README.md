@@ -2,7 +2,7 @@
 
 A secure, peer-to-peer terminal chat application built with Bun, TypeScript, and raw TCP/UDP sockets.
 
-![Terminal Chat Demo](<img width="1470" height="956" alt="image" src="https://github.com/user-attachments/assets/1081f2e3-bec5-410d-90bf-768b55af64d7" />)
+![Terminal Chat Demo](https://github.com/user-attachments/assets/1081f2e3-bec5-410d-90bf-768b55af64d7)
 
 ## Features
 
