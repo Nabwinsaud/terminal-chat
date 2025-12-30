@@ -21,6 +21,11 @@ You can install the latest binary release with a single command:
 curl -fsSL https://raw.githubusercontent.com/nabwinsaud/terminal-chat/main/install.sh | sh
 ```
 
+### Windows (PowerShell)
+```powershell
+iwr -useb https://raw.githubusercontent.com/Nabwinsaud/terminal-chat/main/install.ps1 | iex
+```
+
 ### Manual Build
 If you prefer to build from source:
 
