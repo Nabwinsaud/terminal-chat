@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      
+      - name: Install dependencies
+        run: bun install
+      
+      - name: Build Binaries
+        run: |
+          bun build --compile --target=bun-linux-x64 chat.ts --outfile terminal-chat-linux-x64
+          bun build --compile --target=bun-linux-arm64 chat.ts --outfile terminal-chat-linux-arm64
+          bun build --compile --target=bun-darwin-x64 chat.ts --outfile terminal-chat-darwin-x64
+          bun build --compile --target=bun-darwin-arm64 chat.ts --outfile terminal-chat-darwin-arm64
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            terminal-chat-linux-x64
+            terminal-chat-linux-arm64
+            terminal-chat-darwin-x64
+            terminal-chat-darwin-arm64
+          generate_release_notes: true
