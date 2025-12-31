@@ -5,9 +5,9 @@ REPO="Nabwinsaud/terminal-chat"
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
 
-if [ "$ARCH" == "x86_64" ]; then
+if [ "$ARCH" = "x86_64" ]; then
   ARCH="x64"
-elif [ "$ARCH" == "arm64" ] || [ "$ARCH" == "aarch64" ]; then
+elif [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
   ARCH="arm64"
 else
   echo "Unsupported architecture: $ARCH"
