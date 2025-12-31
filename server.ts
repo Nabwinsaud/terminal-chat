@@ -36,10 +36,10 @@ export class ChatServer extends EventEmitter {
           port: this.port,
           fetch: this.handleRequest.bind(this),
           websocket: {
-            maxPayloadLength: 16 * 1024 * 1024, // 16MB
-            idleTimeout: 120,
-            backpressureLimit: 1024 * 1024, // 1MB
-            closeOnBackpressureLimit: false,
+            maxPayloadLength: 16 * 1024 * 1024, // 16MB - maximum message size
+            idleTimeout: 120, // seconds before idle connection timeout
+            backpressureLimit: 1024 * 1024, // 1MB - buffer limit before backpressure
+            closeOnBackpressureLimit: false, // keep connection open when backpressure limit is reached
             open: this.handleOpen.bind(this),
             message: this.handleMessage.bind(this),
             close: this.handleClose.bind(this),

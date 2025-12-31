@@ -18,12 +18,35 @@ $DownloadUrl = "https://github.com/$Repo/releases/latest/download/$BinaryName"
 $InstallDir = "$env:LOCALAPPDATA\Programs\terminal-chat"
 $ExePath = "$InstallDir\terminal-chat.exe"
 
-Write-Host "Downloading Terminal Chat..."
 if (!(Test-Path $InstallDir)) {
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 }
 
-Invoke-WebRequest -Uri $DownloadUrl -OutFile $ExePath
+if (Test-Path $ExePath) {
+    Write-Host "Updating existing installation..."
+} else {
+    Write-Host "Downloading Terminal Chat..."
+}
+
+$ProgressPreference = 'SilentlyContinue'
+$job = Start-Job -ScriptBlock {
+    param($url, $out)
+    Invoke-WebRequest -Uri $url -OutFile $out
+} -ArgumentList $DownloadUrl, $ExePath
+
+$tempFile = "$env:TEMP\terminal-chat-progress.tmp"
+while ($job.State -eq 'Running') {
+    if (Test-Path $ExePath) {
+        $downloaded = (Get-Item $ExePath).Length / 1MB
+        Write-Progress -Activity "Downloading" -Status ("{0:N2} MB downloaded" -f $downloaded) -PercentComplete -1
+    }
+    Start-Sleep -Milliseconds 200
+}
+
+Receive-Job $job
+Remove-Job $job
+Write-Progress -Activity "Downloading" -Completed
+$ProgressPreference = 'Continue'
 
 # Add to PATH if not present
 $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")

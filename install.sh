@@ -17,29 +17,30 @@ fi
 BINARY="terminal-chat-$OS-$ARCH"
 URL="https://github.com/$REPO/releases/latest/download/$BINARY"
 
+# Install to user directory (no sudo needed)
+INSTALL_DIR="$HOME/.local/bin"
+
 echo "Downloading $BINARY..."
-curl -fsSL --progress-bar -o terminal-chat "$URL"
+curl -L --progress-bar -o terminal-chat "$URL"
 chmod +x terminal-chat
 
-INSTALL_DIR="/usr/local/bin"
+# Create install directory
+mkdir -p "$INSTALL_DIR"
 
-# Try to create install directory if it doesn't exist
-if [ ! -d "$INSTALL_DIR" ]; then
-    echo "Creating $INSTALL_DIR..."
-    if mkdir -p "$INSTALL_DIR" 2>/dev/null; then
-        echo "Created $INSTALL_DIR"
-    else
-        echo "Creating $INSTALL_DIR requires sudo..."
-        sudo mkdir -p "$INSTALL_DIR"
-    fi
+# Check if already installed (for updates)
+if [ -f "$INSTALL_DIR/terminal-chat" ]; then
+    echo "Updating existing installation..."
 fi
 
 echo "Installing to $INSTALL_DIR..."
-if mv terminal-chat "$INSTALL_DIR/terminal-chat" 2>/dev/null; then
-    echo "Installed without sudo"
-else
-    echo "Installation requires sudo permissions..."
-    sudo mv terminal-chat "$INSTALL_DIR/terminal-chat"
+mv terminal-chat "$INSTALL_DIR/terminal-chat"
+
+# Add to PATH if not already there
+if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+    echo ""
+    echo "⚠️  Add to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
+    echo "    export PATH=\"\$HOME/.local/bin:\$PATH\""
+    echo ""
 fi
 
 echo "✓ Success! Run 'terminal-chat' to start."
