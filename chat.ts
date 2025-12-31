@@ -34,15 +34,16 @@ class P2PChat {
   private peers: Map<string, Peer> = new Map();
   private username: string;
   private port: number = 9876;
+  private myId: string;
 
   constructor(username: string) {
     this.username = username;
+    this.myId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     this.crypto = new Crypto();
     this.ui = new TerminalUI(username);
     
-    // Note: Discovery will be created in startServices() after we know the actual port
     this.server = new ChatServer(this.port);
-    this.client = new ChatClient();
+    this.client = new ChatClient(this.myId, this.username);
   }
 
   private setupEventHandlers() {
@@ -196,13 +197,10 @@ class P2PChat {
   async startServices() {
     await this.server.start();
     
-    // Update port if it changed
     this.port = this.server.getPort();
     
-    // Start discovery with the actual port we're using
     this.discovery = new Discovery(this.username, this.port, this.crypto.publicKey);
     
-    // Setup event handlers AFTER creating discovery (important!)
     this.setupEventHandlers();
     
     await this.discovery.start();

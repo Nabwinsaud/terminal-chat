@@ -22,15 +22,24 @@ interface Message {
 export class ChatClient extends EventEmitter {
   private connections: Map<string, WebSocket> = new Map();
   private reconnectTimers: Map<string, Timer> = new Map();
+  private reconnectAttempts: Map<string, number> = new Map();
   private maxReconnectAttempts = 5;
   private reconnectDelay = 2000;
+  private myId: string;
+  private myUsername: string;
+
+  constructor(myId: string, myUsername: string) {
+    super();
+    this.myId = myId;
+    this.myUsername = myUsername;
+  }
 
   async connectToPeer(peer: Peer): Promise<void> {
     if (this.connections.has(peer.id)) {
       return;
     }
 
-    const url = `ws://${peer.ip}:${peer.port}/chat?id=${peer.id}&username=${peer.username}`;
+    const url = `ws://${peer.ip}:${peer.port}/chat?id=${this.myId}&username=${this.myUsername}`;
 
     try {
       const ws = new WebSocket(url);
@@ -39,12 +48,13 @@ export class ChatClient extends EventEmitter {
         console.log(`Connected to peer: ${peer.username}`);
         this.connections.set(peer.id, ws);
         
-        // Clear reconnect timer if exists
+        // Clear reconnect state
         const timer = this.reconnectTimers.get(peer.id);
         if (timer) {
           clearTimeout(timer);
           this.reconnectTimers.delete(peer.id);
         }
+        this.reconnectAttempts.delete(peer.id);
 
         this.emit('peer-connected', peer);
       };
@@ -76,18 +86,22 @@ export class ChatClient extends EventEmitter {
     }
   }
 
-  private scheduleReconnect(peer: Peer, attempt: number = 0) {
-    if (attempt >= this.maxReconnectAttempts) {
+  private scheduleReconnect(peer: Peer, attempt?: number) {
+    const currentAttempt = attempt ?? (this.reconnectAttempts.get(peer.id) || 0);
+    
+    if (currentAttempt >= this.maxReconnectAttempts) {
       console.log(`Max reconnect attempts reached for ${peer.username}`);
+      this.reconnectAttempts.delete(peer.id);
       return;
     }
 
-    const delay = this.reconnectDelay * Math.pow(2, attempt); // Exponential backoff
+    this.reconnectAttempts.set(peer.id, currentAttempt + 1);
+    const delay = this.reconnectDelay * Math.pow(2, currentAttempt);
     
     const timer = setTimeout(() => {
-      console.log(`Reconnecting to ${peer.username} (attempt ${attempt + 1}/${this.maxReconnectAttempts})`);
+      console.log(`Reconnecting to ${peer.username} (attempt ${currentAttempt + 1}/${this.maxReconnectAttempts})`);
       this.connectToPeer(peer).catch(() => {
-        this.scheduleReconnect(peer, attempt + 1);
+        this.scheduleReconnect(peer);
       });
     }, delay);
 
@@ -142,6 +156,8 @@ export class ChatClient extends EventEmitter {
       clearTimeout(timer);
       this.reconnectTimers.delete(peerId);
     }
+    
+    this.reconnectAttempts.delete(peerId);
   }
 
   disconnectAll() {
@@ -154,6 +170,7 @@ export class ChatClient extends EventEmitter {
       clearTimeout(timer);
     }
     this.reconnectTimers.clear();
+    this.reconnectAttempts.clear();
   }
 
   isConnected(peerId: string): boolean {

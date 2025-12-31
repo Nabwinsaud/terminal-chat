@@ -18,14 +18,28 @@ BINARY="terminal-chat-$OS-$ARCH"
 URL="https://github.com/$REPO/releases/latest/download/$BINARY"
 
 echo "Downloading $BINARY..."
-curl -fsSL -o terminal-chat "$URL"
+curl -fsSL --progress-bar -o terminal-chat "$URL"
 chmod +x terminal-chat
 
-echo "Installing to /usr/local/bin..."
-if [ -w /usr/local/bin ]; then
-    mv terminal-chat /usr/local/bin/terminal-chat
-else
-    sudo mv terminal-chat /usr/local/bin/terminal-chat
+INSTALL_DIR="/usr/local/bin"
+
+# Try to create install directory if it doesn't exist
+if [ ! -d "$INSTALL_DIR" ]; then
+    echo "Creating $INSTALL_DIR..."
+    if mkdir -p "$INSTALL_DIR" 2>/dev/null; then
+        echo "Created $INSTALL_DIR"
+    else
+        echo "Creating $INSTALL_DIR requires sudo..."
+        sudo mkdir -p "$INSTALL_DIR"
+    fi
 fi
 
-echo "Success! Run 'terminal-chat' to start."
+echo "Installing to $INSTALL_DIR..."
+if mv terminal-chat "$INSTALL_DIR/terminal-chat" 2>/dev/null; then
+    echo "Installed without sudo"
+else
+    echo "Installation requires sudo permissions..."
+    sudo mv terminal-chat "$INSTALL_DIR/terminal-chat"
+fi
+
+echo "✓ Success! Run 'terminal-chat' to start."

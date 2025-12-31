@@ -36,6 +36,10 @@ export class ChatServer extends EventEmitter {
           port: this.port,
           fetch: this.handleRequest.bind(this),
           websocket: {
+            maxPayloadLength: 16 * 1024 * 1024, // 16MB
+            idleTimeout: 120,
+            backpressureLimit: 1024 * 1024, // 1MB
+            closeOnBackpressureLimit: false,
             open: this.handleOpen.bind(this),
             message: this.handleMessage.bind(this),
             close: this.handleClose.bind(this),
@@ -46,7 +50,7 @@ export class ChatServer extends EventEmitter {
         });
 
         console.log(`Chat server listening on ws://0.0.0.0:${this.port}`);
-        return; // Successfully started
+        return;
       } catch (err: any) {
         if (err.code === 'EADDRINUSE') {
           console.log(`Port ${this.port} is in use, trying ${this.port + 1}...`);
